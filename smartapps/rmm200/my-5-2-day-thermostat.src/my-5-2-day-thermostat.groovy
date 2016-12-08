@@ -90,12 +90,12 @@ def modeChangeHandler(evt) {
 }
 
 // This section sets the HVAC mode based outside temperature. HVAC fan mode is set to "auto".
-// def temperatureHandler(evt) {
-//	log.debug "Heat mode switch temperature $temperatureH, cool mode switch temperature $temperatureC"
+ def temperatureHandler(evt) {
+	log.debug "Heat mode switch temperature $temperatureH, cool mode switch temperature $temperatureC"
     
 //	if (temperatureH == null || temperatureC == null) { // We are in Auto mode or user doesn't want us to switch modes
-//		return
-//	}
+		return
+	}
 	
 //    thermostats.each { thermostat ->
 //        def extTemp = temperatureSensor.currentTemperature
