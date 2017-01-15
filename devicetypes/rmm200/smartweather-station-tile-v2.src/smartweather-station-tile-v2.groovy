@@ -1,27 +1,18 @@
 /**
- *  Copyright 2015 SmartThings
- *
- *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- *  in compliance with the License. You may obtain a copy of the License at:
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software distributed under the License is distributed
- *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
- *  for the specific language governing permissions and limitations under the License.
- *
- *  SmartWeather Station
+ *  SmartWeather Station v2
  *
  *  Author: SmartThings
  *
- *  Date: 2013-04-30
+ *  Date: 2014-10-29
  */
+// for the UI
 metadata {
-	definition (name: "SmartWeather Station Tile", namespace: "smartthings", author: "SmartThings") {
+	// Automatically generated. Make future change here.
+	definition (name: "SmartWeather Station Tile v2", namespace: "rmm200", author: "SmartThings") {
 		capability "Illuminance Measurement"
 		capability "Temperature Measurement"
 		capability "Relative Humidity Measurement"
-		capability "Sensor"
+		capability "polling"
 
 		attribute "localSunrise", "string"
 		attribute "localSunset", "string"
@@ -29,6 +20,7 @@ metadata {
 		attribute "timeZoneOffset", "string"
 		attribute "weather", "string"
 		attribute "wind", "string"
+                attribute "windDir", "string"
 		attribute "weatherIcon", "string"
 		attribute "forecastIcon", "string"
 		attribute "feelsLike", "string"
@@ -49,6 +41,7 @@ metadata {
 		valueTile("temperature", "device.temperature") {
 			state "default", label:'${currentValue}°',
 				backgroundColors:[
+                	[value: 19, color: "#9F8ACD"],
 					[value: 31, color: "#153591"],
 					[value: 44, color: "#1e9cbb"],
 					[value: 59, color: "#90d2a7"],
@@ -116,6 +109,10 @@ metadata {
 			state "default", label:'wind ${currentValue} mph'
 		}
 
+        		valueTile("windDir", "device.windDir", decoration: "flat") {
+			state "default", label:'${currentValue}'
+		}
+
 		valueTile("weather", "device.weather", decoration: "flat") {
 			state "default", label:'${currentValue}'
 		}
@@ -149,7 +146,7 @@ metadata {
 		}
 
 		main(["temperature", "weatherIcon","feelsLike"])
-		details(["temperature", "humidity", "weatherIcon","feelsLike","wind","weather", "city","percentPrecip", "refresh","alert","rise","set","light"])}
+		details(["temperature", "weatherIcon","feelsLike","wind","windDir","weather", "city","percentPrecip", "refresh","alert", "humidity","rise","set","light"])}
 }
 
 // parse events into attributes
@@ -157,17 +154,9 @@ def parse(String description) {
 	log.debug "Parsing '${description}'"
 }
 
-def installed() {
-	runPeriodically(3600, poll)
-}
-
-def uninstalled() {
-	unschedule()
-}
-
 // handle commands
 def poll() {
-	log.debug "WUSTATION: Executing 'poll', location: ${location.name}"
+	log.debug "Executing 'poll', location: ${location.name}"
 
 	// Current conditions
 	def obs = get("conditions")?.current_observation
@@ -181,9 +170,10 @@ def poll() {
 			send(name: "temperature", value: Math.round(obs.temp_f), unit: "F")
 			send(name: "feelsLike", value: Math.round(obs.feelslike_f as Double), unit: "F")
 		}
-		
+
 		send(name: "humidity", value: obs.relative_humidity[0..-2] as Integer, unit: "%")
 		send(name: "weather", value: obs.weather)
+        send(name: "windDir", value: obs.wind_dir)
 		send(name: "weatherIcon", value: weatherIcon, displayed: false)
 		send(name: "wind", value: Math.round(obs.wind_mph) as String, unit: "MPH") // as String because of bug in determining state change of 0 numbers
 
@@ -232,10 +222,10 @@ def poll() {
 		// Alerts
 		def alerts = get("alerts")?.alerts
 		def newKeys = alerts?.collect{it.type + it.date_epoch} ?: []
-		log.debug "WUSTATION: newKeys = $newKeys"
+		log.debug "WUSTATION: newKeys: $newKeys"
 		log.trace device.currentState("alertKeys")
 		def oldKeys = device.currentState("alertKeys")?.jsonValue
-		log.debug "WUSTATION: oldKeys = $oldKeys"
+		log.debug "WUSTATION: oldKeys: $oldKeys"
 
 		def noneString = "no current weather alerts"
 		if (!newKeys && oldKeys == null) {

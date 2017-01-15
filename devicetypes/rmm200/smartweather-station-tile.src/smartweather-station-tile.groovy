@@ -17,7 +17,7 @@
  *  Date: 2013-04-30
  */
 metadata {
-	definition (name: "SmartWeather Station Tile", namespace: "smartthings", author: "SmartThings") {
+	definition (name: "SmartWeather Station Tile", namespace: "rmm200", author: "SmartThings") {
 		capability "Illuminance Measurement"
 		capability "Temperature Measurement"
 		capability "Relative Humidity Measurement"
