@@ -178,13 +178,13 @@ def updated() {
 }
 
 def parse(String description) {
-//    log.debug "Parse received ${description}"
+    log.debug "Parse received ${description}"
     def result = null
     def cmd = zwave.parse(description, [0x31: 1, 0x32: 1, 0x60: 3, 0x80: 1])
     if (cmd) {
         result = createEvent(zwaveEvent(cmd))
     }
-//    if (result) log.debug "Parse returned ${result}"
+    if (result) log.debug "Parse returned ${result}"
     def statusTextmsg = ""
 	statusTextmsg = "Min was ${device.currentState('powerOne')?.value}\nMax was ${device.currentState('powerTwo')?.value}\n"
     sendEvent("name":"statusText", "value":statusTextmsg)
@@ -192,7 +192,7 @@ def parse(String description) {
 }
 
 def zwaveEvent(physicalgraph.zwave.commands.meterv1.MeterReport cmd) {
-    //log.debug "zwaveEvent received ${cmd}"
+    log.debug "zwaveEvent received ${cmd}"
     def dispValue
     def newValue
     def timeString = new Date().format("MM-dd-yy h:mm a", location.timeZone)
